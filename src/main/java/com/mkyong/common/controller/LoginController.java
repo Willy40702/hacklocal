@@ -120,6 +120,14 @@ public class LoginController {
  
 	}
  
+	@RequestMapping(value="/setemail", method = RequestMethod.GET)
+	public String okay(ModelMap model) {
+		
+		model.addAttribute("success", "true");
+		
+		return "notifysettings";
+	}
+	
 	@RequestMapping(value="/notifysettings", method = RequestMethod.GET)
 	public String notification(ModelMap model) {
  
