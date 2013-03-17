@@ -16,12 +16,12 @@
 	<h3>Username : ${username}</h3>	
 	<h3>This is where you change your notification settings.</h3>
 	
-	<form action="notify.jsp">
-	I want to receive notifications by email: <input type="checkbox" name="notification"> <br>
+	<form action="setemail">
+	I want to receive notifications by email: <input type="checkbox" name="notifyflag"> <br>
 	<input type="submit" value="Submit">
 	</form>
 	
-	<form action="setemail.jsp">
+	<form action="setemail">
 	Update email: <input type="text" name="email"> <br>
 	<input type="submit" value="Submit">
 	</form>

@@ -7,10 +7,10 @@
 <h1>Reading Checkbox Data</h1>
 <ul>
 <li><p><b>Notify Flag:</b>
-<%
-String strMasjidLocation = "Selimiyie Masjid Methuen";
-session.setAttribute("MasjidLocation", strMasjidLocation);
-%>
+${flag}
+</p></li>
+<li><p><b>Email:</b>
+${email}
 </p></li>
 </ul>
 </body>

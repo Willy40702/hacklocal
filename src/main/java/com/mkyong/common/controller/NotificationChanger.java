@@ -11,7 +11,7 @@ import java.util.List;
 
 public class NotificationChanger {
 	
-	private String user;
+	private String user = "";
 	private String email = "";
 	private int notification;
 	
@@ -33,7 +33,7 @@ public class NotificationChanger {
       try {
           con = DriverManager.getConnection(url, username, password);
           st = con.createStatement();
-          rs = st.executeQuery("select email, is_email from notification where user_id in (select user_id from users where username = " + name + ")");
+          rs = st.executeQuery("select email, is_email from notification where user_id in (select user_id from users where username = '" + name + "')");
   	  
   	while(rs.next())
 	  {
@@ -53,21 +53,16 @@ public class NotificationChanger {
 		
 		  Connection con = null;
 	      Statement st = null;
-	      ResultSet rs = null;
+	      //ResultSet rs = null;
+	      int result;
 
 	      try {
 	          con = DriverManager.getConnection(url, username, password);
 	          st = con.createStatement();
-	          rs = st.executeQuery("update notification set email = '" + email + "' where user_id in (select user_id from users where username = " + user + ")");
+	          result = st.executeUpdate("update notification set email = '" + email + "' where user_id in (select user_id from users where username = '" + this.user + "')");
 	  	  
 	  	  this.email = email;
 	  	  
-	  	while(rs.next())
-		  {
-	  		System.out.println("well, that worked");
-	  		notification = rs.getInt("is_email");
-	  		email = rs.getString("email");
-		  }
 	  	} catch (SQLException ex) {
 	  		System.out.println("Message: " + ex.getMessage());
 	  	}		
@@ -86,7 +81,8 @@ public class NotificationChanger {
 		
 		  Connection con = null;
 	      Statement st = null;
-	      ResultSet rs = null;
+		  int result;
+	      //ResultSet rs = null;
 
 	      try {
 	          con = DriverManager.getConnection(url, username, password);
@@ -104,14 +100,10 @@ public class NotificationChanger {
 	  	{
 	  	  stmt = con.createStatement();
 
-	  	  rs = stmt.executeQuery("update notification set is_email = " + bool + " where user_id in (select user_id from users where username = " + user + ")");
+	  	  result = stmt.executeUpdate("update notification set is_email = " + bool + " where user_id in (select user_id from users where username = '" + user + "')");
 	  	  
-	  	while(rs.next())
-		  {
-	  		System.out.println("well, that worked");
-	  		notification = rs.getInt("is_email");
-	  		email = rs.getString("email");
-		  }
+	  	this.notification = bool;
+	  	
 	  	} catch (SQLException ex) {
 	  		System.out.println("Message: " + ex.getMessage());
 	  	}
