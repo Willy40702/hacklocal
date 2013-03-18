@@ -10,7 +10,9 @@
 	padding: 8px;
 	margin: 16px;
 }
+body {background: url('C:\Users\Wiliam Hsiao\git\hacklocal\BCCA_Logo.gif') no-repeat top right fixed;}
 </style>
+
 </head>
 <body onload='document.f.j_username.focus();'>
 	<h3>Register with Username and Password (Authentication with Database)</h3>

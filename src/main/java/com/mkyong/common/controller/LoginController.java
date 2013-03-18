@@ -22,12 +22,42 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.mkyong.customer.Customer;
 import com.mkyong.customer.CustomerDAO;
- 
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.StringWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.ModelAndView;
+
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 @Controller
 public class LoginController {
 	
 	private String name;
 	private String roles;
+	private String xml = "";
  
 	@RequestMapping(value="/", method = RequestMethod.GET)
 	public String home(ModelMap model) {
@@ -51,8 +81,8 @@ public class LoginController {
 		ApplicationContext context = 
 	    		new ClassPathXmlApplicationContext("spring-module.xml");
 		 CustomerDAO customerDAO = (CustomerDAO) context.getBean("customerDAO");
-	     Customer customer = new Customer(107, "testing","aaaaaa", 1);
-	    // customerDAO.insert(customer);
+	     Customer customer = new Customer(4562107, "testing","aaaaaa", 1);
+	     customerDAO.insert(customer);
 	     System.out.println("inserted");
 	     Customer customer1 = customerDAO.findByCustomerId(104);
 	     System.out.println(customer1);
@@ -62,7 +92,6 @@ public class LoginController {
 		
 		
 		model.addAttribute("username", name);
-		model.addAttribute("message", "Spring Security login + database example");
 		model.addAttribute("roles",  roles);
 		
 		
@@ -81,53 +110,84 @@ public class LoginController {
         ResultSet rs = null;
 
 
-       try {
-           con = DriverManager.getConnection(url, username, password);
-           st = con.createStatement();
+        try {
+        	con = DriverManager.getConnection(url, username, password);
+        	st = con.createStatement();
 
-           rs = st.executeQuery("select a.appointment_type, a.provider_name, a.building, a.room, a.start_date_time, a.end_date_time from appointments a, users u where u.username = '" + name + "' and u.user_id = a.user_id and a.start_date_time > now()");
+        	rs = st.executeQuery("select a.description, a.id, a.appointment_type, a.provider_name, a.building, a.room, a.start_date_time, a.end_date_time from appointments a, users u where u.username = '" + name + "' and u.user_id = a.user_id");
 
-   	  // get info on ResultSet
-   	  ResultSetMetaData rsmd = rs.getMetaData();
+        	// get info on ResultSet
+        	ResultSetMetaData rsmd = rs.getMetaData();
 
-   	  // get number of columns
-   	  int numCols = rsmd.getColumnCount();
+        	// get number of columns
+        	int numCols = rsmd.getColumnCount();
+        	
+        	System.out.println(numCols);        	
 
-   	  System.out.println(numCols);
-   	  
-   	 List<Appointment> a_list = new ArrayList<Appointment>();
-   	  
-   	while(rs.next())
-	  {
-   		System.out.println("an appointment!!!");
-   		Appointment app = new Appointment();
-	    app.appointment_type = rs.getString("appointment_type");
-	    app.provider_name = rs.getString("provider_name");
-	    app.building = rs.getString("building");
-	    app.room = rs.getInt("room");
-	    app.start_date_time = rs.getDate("start_date_time");
-	    app.end_date_time = rs.getDate("end_date_time");
-	    a_list.add(app);
-	  }
-   	
-   	System.out.println(a_list.size());
+        	List<Appointment> a_list = new ArrayList<Appointment>();        	
+        	
+        	while(rs.next())
+        	{
+        		Appointment app = new Appointment();
+        		app.appointment_type = rs.getString("appointment_type");
+        		app.provider_name = rs.getString("provider_name");
+        		app.building = rs.getString("building");
+        		app.room = rs.getInt("room");
+        		app.start_date_time = rs.getDate("start_date_time");
+        		app.end_date_time = rs.getDate("end_date_time");
+        		app.appoint_id = rs.getInt("id");
+        		app.description = rs.getString("description");
+        		a_list.add(app);
+        	}
 
-   	} catch (SQLException ex) {
-   		System.out.println("Message: " + ex.getMessage());
-   	}
+        	System.out.println(a_list.size());
 
-		return "hello";
+        	xml = xml_write(a_list);        	
+
+        } catch (SQLException ex) {
+        	System.out.println("Message: " + ex.getMessage());
+        }
+        
+        model.addAttribute("xml_test",xml);
+        
+        return "hello";
  
 	}
- 
-	@RequestMapping(value="/setemail", method = RequestMethod.GET)
-	public String okay(ModelMap model) {
-		
-		model.addAttribute("success", "true");
-		
-		return "notifysettings";
+	private String xml_write(List<Appointment> alist){
+		String output = "";
+		Document document = DocumentHelper.createDocument();
+		Element root = document.addElement( "data" );
+
+		Iterator<Appointment> it = alist.iterator();
+		while(it.hasNext()){
+			
+			Appointment ap = it.next();
+			
+			Element event = root.addElement( "event" )
+				.addAttribute( "id", Integer.toString(ap.appoint_id) )
+				.addAttribute( "start_date", ap.start_date_time.toString() )
+				.addAttribute( "end_date", ap.end_date_time.toString() )
+				.addAttribute( "text", ap.provider_name+", "+ap.building+", "+ap.appointment_type )
+				.addAttribute( "details", ap.description );					
+		}
+
+		try{
+			StringWriter stw = new StringWriter();
+			// lets write to a file
+			XMLWriter writer = new XMLWriter(
+					stw, OutputFormat.createPrettyPrint()
+					);
+			writer.write( document );
+			writer.close();
+			output = stw.toString();
+			output = output.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+		}
+		catch(Exception io){
+			io.printStackTrace();
+		}
+		return output;
 	}
-	
+ 
 	@RequestMapping(value="/notifysettings", method = RequestMethod.GET)
 	public String notification(ModelMap model) {
  

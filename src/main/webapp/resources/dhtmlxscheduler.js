@@ -3992,8 +3992,8 @@ scheduler.showEvent = function(id, mode) {
 scheduler._loaded = {};
 scheduler._load = function(url, from) {
 	url = url || this._load_url;
-	url += (url.indexOf("?") == -1 ? "?" : "&") + "timeshift=" + (new Date()).getTimezoneOffset();
-	if (this.config.prevent_cache)    url += "&uid=" + this.uid();
+	//url += (url.indexOf("?") == -1 ? "?" : "&") + "timeshift=" + (new Date()).getTimezoneOffset();
+	//if (this.config.prevent_cache)    url += "&uid=" + this.uid();
 	var to;
 	from = from || this._date;
 
@@ -4019,24 +4019,31 @@ scheduler._load = function(url, from) {
 
 		if (to <= from)
 			return false; //already loaded
-		dhtmlxAjax.get(url + "&from=" + lf(from) + "&to=" + lf(to), function(l) {scheduler.on_load(l);});
+		//dhtmlxAjax.get(url + "&from=" + lf(from) + "&to=" + lf(to), function(l) {scheduler.on_load(l);});
+		scheduler.on_load(url);
+		/*
 		while (from < to) {
 			this._loaded[lf(from)] = true;
 			from = this.date.add(from, 1, this._load_mode);
 		}
-	} else
-		dhtmlxAjax.get(url, function(l) {scheduler.on_load(l);});
+		*/
+	} else{
+		//dhtmlxAjax.get(url, function(l) {scheduler.on_load(l);});
+		scheduler.on_load(url);
+	}
 	this.callEvent("onXLS", []);
 	return true;
 };
 scheduler.on_load = function(loader) {
-	var evs;
+	var evs = loader;
+	/*
 	if (this._process) {
 		evs = this[this._process].parse(loader.xmlDoc.responseText);
 	} else {
+	*/
 		evs = this._magic_parser(loader);
-	}
-
+	//}
+	
 	scheduler._process_loading(evs);
 
 	this.callEvent("onXLE", []);
@@ -4113,7 +4120,7 @@ scheduler.load = function(url, call) {
 		this._process = call;
 		call = arguments[2];
 	}
-
+	
 	this._load_url = url;
 	this._after_call = call;
 	this._load(url, this._date);
@@ -4141,18 +4148,18 @@ scheduler.serverList = function(name, array) {
 scheduler._userdata = {};
 scheduler._magic_parser = function(loader) {
 	var xml;
-	if (!loader.getXMLTopNode) { //from a string
-		var xml_string = loader.xmlDoc.responseText;
+	//if (!loader.getXMLTopNode) { //from a string
+		//var xml_string = loader.xmlDoc.responseText;
+		var xml_string = loader;
 		loader = new dtmlXMLLoaderObject(function() {});
 		loader.loadXMLString(xml_string);
-	}
-
+	//}
 	xml = loader.getXMLTopNode("data");
 	if (xml.tagName != "data") return [];//not an xml
 	var skey = xml.getAttribute("dhx_security");
 	if (skey)
 		dhtmlx.security_key = skey;
-
+	
 	var opts = loader.doXPath("//coll_options");
 	for (var i = 0; i < opts.length; i++) {
 		var bind = opts[i].getAttribute("for");

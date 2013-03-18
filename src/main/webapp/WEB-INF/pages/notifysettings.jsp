@@ -10,28 +10,28 @@
 	padding: 8px;
 	margin: 16px;
 }
+body {background: url('C:\Users\Wiliam Hsiao\git\hacklocal\BCCA_Logo.gif') no-repeat top right fixed;}
 </style>
 </head>
 <body>
 	<h3>Username : ${username}</h3>	
 	<h3>This is where you change your notification settings.</h3>
-	<c:if test="${not empty success}">
-		<div class="errorblock">
-			Your changes were saved.
-		</div>
-	</c:if>
-
-	<form action="setemail" method="GET">
-	Update email: <input type="text" name="email"> <br>
-	Leave field empty if you wish to remove your email.<br>
+	
+	<form action="setnotify">
+	I want to receive notifications by email: <input type="checkbox" name="notifyflag"> <br>
 	<input type="submit" value="Submit">
 	</form>
-	<br>
-	<form action="setnotify" method="GET">
-	I want to receive notifications by email: <input type="checkbox" name="notifyflag"> <br>
-	Leave box unchecked if you wish to unsubscribe from email notifications.<br>
+	
+	<form action="setemail">
+	Update email: <input type="text" name="email"> <br>
 	<input type="submit" value="Submit">
-	<br>
+	</form>
+	
+	<%
+   String strMasjidLocation = "Selimiyie Masjid Methuen";
+   session.setAttribute("MasjidLocation", strMasjidLocation);
+   %>
+	
 	<a href="<c:url value="/j_spring_security_logout" />" > Logout</a>
 	
 </body>
